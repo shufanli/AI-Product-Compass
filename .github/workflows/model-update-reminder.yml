@@ -1,0 +1,26 @@
+name: Weekly Model Update Reminder
+
+on:
+  schedule:
+    # 每周一 UTC 9:00（北京时间 17:00）
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # 支持手动触发
+
+jobs:
+  create-reminder:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create update reminder issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const today = new Date().toISOString().split('T')[0];
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[模型更新] ${today} 周度模型动态检查`,
+              body: `## 模型动态周度更新提醒\n\n请打开 Claude Code，执行以下操作：\n\n\`\`\`\n更新模型对比\n\`\`\`\n\nClaude 会自动搜索 8 家模型的最新信息并更新 \`ai-landscape/model-comparison.md\`。\n\n### 重点关注\n- [ ] 是否有新模型发布\n- [ ] 是否有重大能力提升\n- [ ] 是否有定价变动\n- [ ] 是否有新增模态支持\n\n---\n*此 Issue 由 GitHub Actions 自动创建*`,
+              labels: ['maintenance', 'model-update']
+            });
