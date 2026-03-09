@@ -5,6 +5,7 @@
 ## 已有内容
 
 - [**模型全景对比**](model-comparison.md) — 8 家主流 AI 模型的结构化对比与产品选型指南
+- [**Agent-Native 时代**](agent-native-era.md) — 软件生态的 Agent 化趋势、人机协作范式转变与 PM 启示
 
 ## 建议收录
 
