@@ -12,19 +12,19 @@ jobs:
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
           FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET }}
-          PUSH_PAYLOAD: ${{ toJSON(github.event) }}
         run: |
           node << 'SCRIPT'
           (async () => {
           const crypto = require('crypto');
+          const fs = require('fs');
 
           const webhookUrl = process.env.FEISHU_WEBHOOK_URL;
           const secret = process.env.FEISHU_WEBHOOK_SECRET;
-          const event = JSON.parse(process.env.PUSH_PAYLOAD);
+          const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
 
-          // Debug: check secrets are loaded
           console.log('Webhook URL loaded:', !!webhookUrl);
           console.log('Secret loaded:', !!secret);
+          console.log('Event loaded, repo:', event.repository.full_name);
 
           // Feishu signature
           const timestamp = Math.floor(Date.now() / 1000).toString();
@@ -97,6 +97,7 @@ jobs:
             }
           };
 
+          console.log('Sending to Feishu...');
           const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
