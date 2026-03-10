@@ -12,8 +12,19 @@ jobs:
         uses: actions/github-script@v7
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET }}
         with:
           script: |
+            const crypto = require('crypto');
+
+            // Build Feishu signature
+            const timestamp = Math.floor(Date.now() / 1000).toString();
+            const stringToSign = `${timestamp}\n${process.env.FEISHU_WEBHOOK_SECRET}`;
+            const sign = crypto.createHmac('sha256', stringToSign)
+              .update('')
+              .digest('base64');
+
+            // Build commit summary
             const commits = context.payload.commits || [];
             const repo = context.payload.repository.full_name;
             const branch = context.ref.replace('refs/heads/', '');
@@ -27,7 +38,7 @@ jobs:
               const added = c.added.length;
               const modified = c.modified.length;
               const removed = c.removed.length;
-              return `• ${short} ${msg} (by ${author}) [+${added} ~${modified} -${removed}]`;
+              return `• ${short} ${msg}\n  by ${author} | +${added} ~${modified} -${removed}`;
             }).join('\n');
 
             if (!commitLines) commitLines = '（无提交信息）';
@@ -36,20 +47,37 @@ jobs:
             const totalModified = commits.reduce((s, c) => s + c.modified.length, 0);
             const totalRemoved = commits.reduce((s, c) => s + c.removed.length, 0);
 
+            // Collect all changed files
+            const allAdded = commits.flatMap(c => c.added).filter(Boolean);
+            const allModified = commits.flatMap(c => c.modified).filter(Boolean);
+            const allRemoved = commits.flatMap(c => c.removed).filter(Boolean);
+
+            let fileLines = [];
+            if (allAdded.length) fileLines.push(`🟢 新增: ${allAdded.join(', ')}`);
+            if (allModified.length) fileLines.push(`🟡 修改: ${allModified.join(', ')}`);
+            if (allRemoved.length) fileLines.push(`🔴 删除: ${allRemoved.join(', ')}`);
+            const fileSection = fileLines.length ? fileLines.join('\n') : '（无文件变更）';
+
             const title = `📦 ${repo} 有新的推送`;
             const content = [
               `**分支:** ${branch}`,
               `**推送者:** ${pusher}`,
-              `**提交数:** ${commits.length}`,
-              `**文件变更:** +${totalAdded} 新增  ~${totalModified} 修改  -${totalRemoved} 删除`,
+              `**提交数:** ${commits.length}  |  文件: +${totalAdded} ~${totalModified} -${totalRemoved}`,
               ``,
-              `**提交详情:**`,
+              `---`,
+              `**提交记录:**`,
               commitLines,
               ``,
-              `[查看对比](${compareUrl})`
+              `---`,
+              `**变更文件:**`,
+              fileSection,
+              ``,
+              `[查看完整对比 →](${compareUrl})`
             ].join('\n');
 
             const payload = {
+              timestamp,
+              sign,
               msg_type: "interactive",
               card: {
                 header: {
