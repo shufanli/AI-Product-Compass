@@ -12,3 +12,5 @@ AI 产品经理的知识罗盘。
 | [case-studies](./case-studies/) | 案例研究 — 竞品拆解、成功/失败复盘 |
 | [templates](./templates/) | 模板库 — 拿来即用的文档模板 |
 | [career](./career/) | 职业成长 — 技能路线、书单、面试 |
+
+> 最后更新：2026-03-10
