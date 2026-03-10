@@ -15,6 +15,7 @@ jobs:
           PUSH_PAYLOAD: ${{ toJSON(github.event) }}
         run: |
           node << 'SCRIPT'
+          (async () => {
           const crypto = require('crypto');
 
           const webhookUrl = process.env.FEISHU_WEBHOOK_URL;
@@ -96,20 +97,17 @@ jobs:
             }
           };
 
-          fetch(webhookUrl, {
+          const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-          })
-          .then(r => r.json())
-          .then(r => {
-            console.log('Feishu response:', JSON.stringify(r));
-            if (r.code !== 0) {
-              process.exit(1);
-            }
-          })
-          .catch(e => {
-            console.error('Request failed:', e);
-            process.exit(1);
           });
+          const result = await response.json();
+          console.log('Feishu response:', JSON.stringify(result));
+          if (result.code !== 0) {
+            console.error('Feishu notification failed:', result.msg);
+            process.exit(1);
+          }
+          console.log('Feishu notification sent successfully');
+          })().catch(e => { console.error(e); process.exit(1); });
           SCRIPT
