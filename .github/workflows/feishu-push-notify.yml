@@ -10,6 +10,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Debug info
+        run: |
+          echo "Node version: $(node -v)"
+          echo "Event path: $GITHUB_EVENT_PATH"
+          echo "Event file exists: $(test -f $GITHUB_EVENT_PATH && echo yes || echo no)"
+          echo "URL set: ${{ secrets.FEISHU_WEBHOOK_URL != '' }}"
+          echo "Secret set: ${{ secrets.FEISHU_WEBHOOK_SECRET != '' }}"
+
       - name: Send to Feishu
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
