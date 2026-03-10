@@ -1,17 +1,43 @@
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err.stack || err.message || err);
+  process.exit(1);
+});
+
 const crypto = require('crypto');
 const fs = require('fs');
 const https = require('https');
 
+console.log('Script started');
+
 const webhookUrl = process.env.FEISHU_WEBHOOK_URL;
 const secret = process.env.FEISHU_WEBHOOK_SECRET;
 const eventPath = process.env.GITHUB_EVENT_PATH;
+
+console.log('FEISHU_WEBHOOK_URL set:', !!webhookUrl);
+console.log('FEISHU_WEBHOOK_SECRET set:', !!secret);
+console.log('GITHUB_EVENT_PATH:', eventPath);
 
 if (!webhookUrl || !secret) {
   console.error('Missing FEISHU_WEBHOOK_URL or FEISHU_WEBHOOK_SECRET');
   process.exit(1);
 }
 
-const event = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
+if (!eventPath || !fs.existsSync(eventPath)) {
+  console.error('Event file not found:', eventPath);
+  process.exit(1);
+}
+
+console.log('Reading event file...');
+const eventRaw = fs.readFileSync(eventPath, 'utf8');
+console.log('Event file length:', eventRaw.length);
+
+let event;
+try {
+  event = JSON.parse(eventRaw);
+} catch (e) {
+  console.error('Failed to parse event JSON:', e.message);
+  process.exit(1);
+}
 console.log('Event loaded, repo:', event.repository.full_name);
 
 // Feishu signature
