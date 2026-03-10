@@ -1,0 +1,87 @@
+name: Notify Feishu on Push
+
+on:
+  push:
+    branches: ['**']
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build commit summary
+        id: summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commits = context.payload.commits || [];
+            const repo = context.payload.repository.full_name;
+            const branch = context.ref.replace('refs/heads/', '');
+            const pusher = context.payload.pusher.name;
+            const compareUrl = context.payload.compare;
+
+            let commitLines = commits.map(c => {
+              const short = c.id.substring(0, 7);
+              const msg = c.message.split('\n')[0];
+              const author = c.author.name;
+              const added = c.added.length;
+              const modified = c.modified.length;
+              const removed = c.removed.length;
+              return `• ${short} ${msg} (by ${author}) [+${added} ~${modified} -${removed}]`;
+            }).join('\n');
+
+            if (!commitLines) commitLines = '（无 commit 信息）';
+
+            const totalAdded = commits.reduce((s, c) => s + c.added.length, 0);
+            const totalModified = commits.reduce((s, c) => s + c.modified.length, 0);
+            const totalRemoved = commits.reduce((s, c) => s + c.removed.length, 0);
+
+            const title = `📦 ${repo} 有新的 Push`;
+            const content = [
+              `分支: ${branch}`,
+              `推送者: ${pusher}`,
+              `提交数: ${commits.length}`,
+              `文件变更: +${totalAdded} 新增  ~${totalModified} 修改  -${totalRemoved} 删除`,
+              ``,
+              `提交详情:`,
+              commitLines,
+              ``,
+              `查看对比: ${compareUrl}`
+            ].join('\n');
+
+            core.setOutput('title', title);
+            core.setOutput('content', content);
+
+      - name: Send to Feishu
+        env:
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+        run: |
+          TITLE="${{ steps.summary.outputs.title }}"
+          # Use a heredoc to preserve newlines in content
+          CONTENT=$(cat <<'CONTENT_EOF'
+          ${{ steps.summary.outputs.content }}
+          CONTENT_EOF
+          )
+
+          # Build JSON payload for Feishu interactive card
+          PAYLOAD=$(jq -n \
+            --arg title "$TITLE" \
+            --arg content "$CONTENT" \
+            '{
+              msg_type: "interactive",
+              card: {
+                header: {
+                  title: { tag: "plain_text", content: $title },
+                  template: "blue"
+                },
+                elements: [
+                  {
+                    tag: "markdown",
+                    content: $content
+                  }
+                ]
+              }
+            }')
+
+          curl -s -X POST "$FEISHU_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"
