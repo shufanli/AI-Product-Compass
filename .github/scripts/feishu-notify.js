@@ -55,19 +55,22 @@ const compareUrl = event.compare;
 let commitLines = commits.map(c => {
   const short = c.id.substring(0, 7);
   const msg = c.message.split('\n')[0];
-  const author = c.author.name;
-  return '• ' + short + ' ' + msg + '\n  by ' + author + ' | +' + c.added.length + ' ~' + c.modified.length + ' -' + c.removed.length;
+  const author = (c.author && c.author.name) || 'unknown';
+  const added = (c.added || []).length;
+  const modified = (c.modified || []).length;
+  const removed = (c.removed || []).length;
+  return '• ' + short + ' ' + msg + '\n  by ' + author + ' | +' + added + ' ~' + modified + ' -' + removed;
 }).join('\n');
 
 if (!commitLines) commitLines = '（无提交信息）';
 
-const totalAdded = commits.reduce((s, c) => s + c.added.length, 0);
-const totalModified = commits.reduce((s, c) => s + c.modified.length, 0);
-const totalRemoved = commits.reduce((s, c) => s + c.removed.length, 0);
+const totalAdded = commits.reduce((s, c) => s + (c.added || []).length, 0);
+const totalModified = commits.reduce((s, c) => s + (c.modified || []).length, 0);
+const totalRemoved = commits.reduce((s, c) => s + (c.removed || []).length, 0);
 
-const allAdded = commits.flatMap(c => c.added).filter(Boolean);
-const allModified = commits.flatMap(c => c.modified).filter(Boolean);
-const allRemoved = commits.flatMap(c => c.removed).filter(Boolean);
+const allAdded = commits.flatMap(c => c.added || []).filter(Boolean);
+const allModified = commits.flatMap(c => c.modified || []).filter(Boolean);
+const allRemoved = commits.flatMap(c => c.removed || []).filter(Boolean);
 
 const fileLines = [];
 if (allAdded.length) fileLines.push('🟢 新增: ' + allAdded.join(', '));
