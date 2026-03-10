@@ -160,6 +160,7 @@ jobs:
 | 飞书返回 `Ip Not Allowed` | IP 白名单模式，GitHub Actions IP 不固定 | 改用签名校验 |
 | Actions 显示成功但飞书没收到 | `fetch` 没有 `await`，node 进程提前退出 | 用 async IIFE 包裹并 `await fetch` |
 | 环境变量传递 JSON 失败 | `toJSON(github.event)` 含引号/换行，shell 转义出错 | 改用 `GITHUB_EVENT_PATH` 文件读取 |
+| Heredoc 内联脚本在 Actions 中静默失败 | `node << 'SCRIPT'` 在 GitHub Actions 的 shell 中行为不一致，脚本可能未正确执行但 step 仍报成功 | **将脚本提取为独立 `.js` 文件**（`.github/scripts/feishu-notify.js`），workflow 中用 `node .github/scripts/feishu-notify.js` 调用，彻底避免 shell 转义问题。需先 `actions/checkout@v4` 检出代码 |
 
 ## 扩展方向
 
