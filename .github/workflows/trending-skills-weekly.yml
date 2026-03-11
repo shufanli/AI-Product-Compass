@@ -1,0 +1,54 @@
+name: Weekly ClawHub Trending Skills
+
+on:
+  schedule:
+    # 每周一 UTC 10:00（北京时间 18:00），与模型更新提醒错开 1 小时
+    - cron: '0 10 * * 1'
+  workflow_dispatch: # 支持手动触发
+
+jobs:
+  fetch-trending-skills:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch trending skills from ClawHub
+        id: fetch
+        run: node .github/scripts/fetch-trending-skills.js
+
+      - name: Commit and push updated file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ai-landscape/trending-skills.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: update ClawHub trending skills weekly report"
+            git push
+          fi
+
+      - name: Create reminder issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '${{ steps.fetch.outputs.issue_title }}' || `[Skills 周报] ${new Date().toISOString().split('T')[0]} ClawHub 热门 Skills Top 10`;
+            const body = process.env.ISSUE_BODY || '本周 ClawHub 热门 Skills 已更新至 `ai-landscape/trending-skills.md`，请查阅。\n\n---\n*此 Issue 由 GitHub Actions 自动创建*';
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['maintenance', 'skills-weekly']
+            });
+        env:
+          ISSUE_BODY: ${{ steps.fetch.outputs.issue_body }}
