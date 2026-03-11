@@ -33,30 +33,44 @@ function httpsGet(url) {
 
 /**
  * 从 ClawHub API 获取热门 skills
- * 综合排序：按下载量 + 星标数加权
+ * 分别按下载量和星标数拉取，然后综合排序
  */
 async function fetchTrendingSkills() {
   console.log('Fetching trending skills from ClawHub...');
 
-  // 尝试 ClawHub 公开 API
-  const apiUrl = 'https://clawhub.ai/api/skills?sort=trending&limit=20';
-  const raw = await httpsGet(apiUrl);
-  const data = JSON.parse(raw);
+  // 分别按下载量和星标数获取 top 20，合并后综合排序
+  const [downloadRaw, starsRaw] = await Promise.all([
+    httpsGet('https://clawhub.ai/api/v1/skills?sort=downloads&limit=20'),
+    httpsGet('https://clawhub.ai/api/v1/skills?sort=stars&limit=20'),
+  ]);
 
-  // 兼容不同的 API 响应结构
-  let skills = Array.isArray(data) ? data : (data.skills || data.results || data.data || []);
+  const downloadData = JSON.parse(downloadRaw);
+  const starsData = JSON.parse(starsRaw);
+
+  const downloadItems = downloadData.items || [];
+  const starsItems = starsData.items || [];
+
+  // 按 slug 去重合并
+  const skillMap = new Map();
+  for (const s of [...downloadItems, ...starsItems]) {
+    if (!skillMap.has(s.slug)) {
+      skillMap.set(s.slug, s);
+    }
+  }
+
+  let skills = Array.from(skillMap.values());
 
   if (!skills.length) {
     throw new Error('No skills returned from ClawHub API');
   }
 
   // 综合排序：下载量权重 0.7 + 星标数权重 0.3（归一化后加权）
-  const maxDownloads = Math.max(...skills.map(s => s.downloads || s.download_count || 0), 1);
-  const maxStars = Math.max(...skills.map(s => s.stars || s.star_count || 0), 1);
+  const maxDownloads = Math.max(...skills.map(s => (s.stats && s.stats.downloads) || 0), 1);
+  const maxStars = Math.max(...skills.map(s => (s.stats && s.stats.stars) || 0), 1);
 
   skills = skills.map(s => {
-    const downloads = s.downloads || s.download_count || 0;
-    const stars = s.stars || s.star_count || 0;
+    const downloads = (s.stats && s.stats.downloads) || 0;
+    const stars = (s.stats && s.stats.stars) || 0;
     const score = 0.7 * (downloads / maxDownloads) + 0.3 * (stars / maxStars);
     return { ...s, _downloads: downloads, _stars: stars, _score: score };
   });
@@ -86,9 +100,9 @@ function generateMarkdown(skills, date) {
   ];
 
   skills.forEach((s, i) => {
-    const name = s.name || s.skill_name || 'Unknown';
+    const name = s.displayName || s.slug || 'Unknown';
     const downloads = (s._downloads || 0).toLocaleString('en-US');
-    const desc = (s.description || s.summary || '暂无描述').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+    const desc = (s.summary || '暂无描述').replace(/\|/g, '\\|').replace(/\n/g, ' ');
     lines.push(`| ${i + 1} | **${name}** | ${downloads} | ${desc} |`);
   });
 
@@ -125,9 +139,9 @@ function generateIssueBody(skills, date) {
   body += '|:----:|-------|------:|------|\n';
 
   skills.forEach((s, i) => {
-    const name = s.name || s.skill_name || 'Unknown';
+    const name = s.displayName || s.slug || 'Unknown';
     const downloads = (s._downloads || 0).toLocaleString('en-US');
-    const desc = (s.description || s.summary || '暂无描述').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+    const desc = (s.summary || '暂无描述').replace(/\|/g, '\\|').replace(/\n/g, ' ');
     body += `| ${i + 1} | **${name}** | ${downloads} | ${desc} |\n`;
   });
 
@@ -169,7 +183,7 @@ async function main() {
   console.log(issueTitle);
   console.log('\n--- Top Skills ---');
   skills.forEach((s, i) => {
-    console.log(`${i + 1}. ${s.name || s.skill_name} (${s._downloads} downloads)`);
+    console.log(`${i + 1}. ${s.displayName || s.slug} (${s._downloads} downloads)`);
   });
 }
 
