@@ -32,6 +32,69 @@ function httpsGet(url) {
 }
 
 /**
+ * 带超时的 HTTPS GET 请求
+ */
+function httpsGetWithTimeout(url, timeoutMs = 5000) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, { headers: { 'User-Agent': 'ProductCompass/1.0' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return httpsGetWithTimeout(res.headers.location, timeoutMs).then(resolve, reject);
+      }
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        if (res.statusCode !== 200) {
+          return reject(new Error(`HTTP ${res.statusCode}`));
+        }
+        resolve(body);
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(timeoutMs, () => { req.destroy(); reject(new Error('timeout')); });
+  });
+}
+
+/**
+ * 将英文文本翻译为中文（Google Translate 免费接口）
+ * 超时或失败时返回原文
+ */
+function translateToChinese(text) {
+  const encoded = encodeURIComponent(text.substring(0, 500));
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=${encoded}`;
+  return httpsGetWithTimeout(url, 8000).then(raw => {
+    const data = JSON.parse(raw);
+    if (Array.isArray(data) && Array.isArray(data[0])) {
+      return data[0].map(seg => seg[0]).join('');
+    }
+    return text;
+  }).catch(() => text);
+}
+
+/**
+ * 批量翻译 skills 的描述
+ * 翻译失败时优雅降级，保留英文原文
+ */
+async function translateSkillDescriptions(skills) {
+  console.log('Translating descriptions to Chinese...');
+  // 先测试翻译接口是否可用
+  const testResult = await translateToChinese('hello');
+  if (testResult === 'hello') {
+    console.log('Translation service unavailable, keeping original descriptions');
+    return skills;
+  }
+  console.log('Translation service available, translating...');
+  for (const s of skills) {
+    const original = s.summary || '';
+    if (original) {
+      s._descZh = await translateToChinese(original);
+    } else {
+      s._descZh = '暂无描述';
+    }
+  }
+  return skills;
+}
+
+/**
  * 从 ClawHub API 获取热门 skills
  * 分别按下载量和星标数拉取，然后综合排序
  */
@@ -102,7 +165,7 @@ function generateMarkdown(skills, date) {
   skills.forEach((s, i) => {
     const name = s.displayName || s.slug || 'Unknown';
     const downloads = (s._downloads || 0).toLocaleString('en-US');
-    const desc = (s.summary || '暂无描述').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+    const desc = (s._descZh || s.summary || '暂无描述').replace(/\|/g, '\\|').replace(/\n/g, ' ');
     lines.push(`| ${i + 1} | **${name}** | ${downloads} | ${desc} |`);
   });
 
@@ -141,7 +204,7 @@ function generateIssueBody(skills, date) {
   skills.forEach((s, i) => {
     const name = s.displayName || s.slug || 'Unknown';
     const downloads = (s._downloads || 0).toLocaleString('en-US');
-    const desc = (s.summary || '暂无描述').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+    const desc = (s._descZh || s.summary || '暂无描述').replace(/\|/g, '\\|').replace(/\n/g, ' ');
     body += `| ${i + 1} | **${name}** | ${downloads} | ${desc} |\n`;
   });
 
@@ -157,8 +220,11 @@ function generateIssueBody(skills, date) {
 async function main() {
   const today = new Date().toISOString().split('T')[0];
 
-  const skills = await fetchTrendingSkills();
+  let skills = await fetchTrendingSkills();
   console.log(`Fetched ${skills.length} trending skills`);
+
+  // 翻译描述为中文
+  skills = await translateSkillDescriptions(skills);
 
   // 写入 Markdown 文件
   const markdown = generateMarkdown(skills, today);
