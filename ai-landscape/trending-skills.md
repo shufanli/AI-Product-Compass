@@ -10,16 +10,16 @@
 
 | 排名 | Skill 名称 | 下载量 | 描述 |
 |:----:|-----------|------:|------|
-| 1 | **self-improving-agent** | 176,450 | Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Clau... |
-| 2 | **Find Skills** | 172,280 | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill. |
-| 3 | **Summarize** | 133,169 | Summarize URLs or files with the summarize CLI (web, PDFs, images, audio, YouTube). |
-| 4 | **Gog** | 104,647 | Google Workspace CLI for Gmail, Calendar, Drive, Contacts, Sheets, and Docs. |
-| 5 | **Agent Browser** | 110,421 | A fast Rust-based headless browser automation CLI with Node.js fallback that enables AI agents to navigate, click, type, and snapshot pages via structured commands. |
-| 6 | **Github** | 97,212 | Interact with GitHub using the `gh` CLI. Use `gh issue`, `gh pr`, `gh run`, and `gh api` for issues, PRs, CI runs, and advanced queries. |
-| 7 | **Proactive Agent** | 86,936 | Transform AI agents from task-followers into proactive partners that anticipate needs and continuously improve. Now with WAL Protocol, Working Buffer, Autonomous Crons, and battle-tested patterns. Part of the Hal Stack 🦞 |
-| 8 | **ontology** | 95,246 | Typed knowledge graph for structured agent memory and composable skills. Use when creating/querying entities (Person, Project, Task, Event, Document), linkin... |
-| 9 | **Weather** | 83,408 | Get current weather and forecasts (no API key required). |
-| 10 | **Skill Vetter** | 67,983 | Security-first skill vetting for AI agents. Use before installing any skill from ClawdHub, GitHub, or other sources. Checks for red flags, permission scope, and suspicious patterns. |
+| 1 | **self-improving-agent** | 176,479 | Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Clau... |
+| 2 | **Find Skills** | 172,318 | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill. |
+| 3 | **Summarize** | 133,186 | Summarize URLs or files with the summarize CLI (web, PDFs, images, audio, YouTube). |
+| 4 | **Gog** | 104,653 | Google Workspace CLI for Gmail, Calendar, Drive, Contacts, Sheets, and Docs. |
+| 5 | **Agent Browser** | 110,428 | A fast Rust-based headless browser automation CLI with Node.js fallback that enables AI agents to navigate, click, type, and snapshot pages via structured commands. |
+| 6 | **Github** | 97,220 | Interact with GitHub using the `gh` CLI. Use `gh issue`, `gh pr`, `gh run`, and `gh api` for issues, PRs, CI runs, and advanced queries. |
+| 7 | **Proactive Agent** | 86,940 | Transform AI agents from task-followers into proactive partners that anticipate needs and continuously improve. Now with WAL Protocol, Working Buffer, Autonomous Crons, and battle-tested patterns. Part of the Hal Stack 🦞 |
+| 8 | **ontology** | 95,252 | Typed knowledge graph for structured agent memory and composable skills. Use when creating/querying entities (Person, Project, Task, Event, Document), linkin... |
+| 9 | **Weather** | 83,414 | Get current weather and forecasts (no API key required). |
+| 10 | **Skill Vetter** | 67,998 | Security-first skill vetting for AI agents. Use before installing any skill from ClawdHub, GitHub, or other sources. Checks for red flags, permission scope, and suspicious patterns. |
 
 ---
 
