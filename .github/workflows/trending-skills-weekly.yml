@@ -24,6 +24,8 @@ jobs:
       - name: Fetch trending skills from ClawHub
         id: fetch
         run: node .github/scripts/fetch-trending-skills.js
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Commit and push updated file
         run: |

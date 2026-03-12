@@ -32,65 +32,91 @@ function httpsGet(url) {
 }
 
 /**
- * 带超时的 HTTPS GET 请求
+ * HTTPS POST 请求封装
  */
-function httpsGetWithTimeout(url, timeoutMs = 5000) {
+function httpsPost(url, payload, timeoutMs = 15000) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { headers: { 'User-Agent': 'ProductCompass/1.0' } }, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return httpsGetWithTimeout(res.headers.location, timeoutMs).then(resolve, reject);
-      }
+    const urlObj = new URL(url);
+    const data = JSON.stringify(payload);
+    const req = https.request({
+      hostname: urlObj.hostname,
+      path: urlObj.pathname + urlObj.search,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data),
+      },
+    }, (res) => {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
         if (res.statusCode !== 200) {
-          return reject(new Error(`HTTP ${res.statusCode}`));
+          return reject(new Error(`HTTP ${res.statusCode}: ${body.substring(0, 300)}`));
         }
         resolve(body);
       });
     });
     req.on('error', reject);
     req.setTimeout(timeoutMs, () => { req.destroy(); reject(new Error('timeout')); });
+    req.write(data);
+    req.end();
   });
 }
 
 /**
- * 将英文文本翻译为中文（Google Translate 免费接口）
- * 超时或失败时返回原文
- */
-function translateToChinese(text) {
-  const encoded = encodeURIComponent(text.substring(0, 500));
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=${encoded}`;
-  return httpsGetWithTimeout(url, 8000).then(raw => {
-    const data = JSON.parse(raw);
-    if (Array.isArray(data) && Array.isArray(data[0])) {
-      return data[0].map(seg => seg[0]).join('');
-    }
-    return text;
-  }).catch(() => text);
-}
-
-/**
- * 批量翻译 skills 的描述
- * 翻译失败时优雅降级，保留英文原文
+ * 使用 Gemini API 批量翻译 skills 描述为中文
+ * 一次请求翻译全部描述，节省配额
+ * 失败时优雅降级，保留英文原文
  */
 async function translateSkillDescriptions(skills) {
-  console.log('Translating descriptions to Chinese...');
-  // 先测试翻译接口是否可用
-  const testResult = await translateToChinese('hello');
-  if (testResult === 'hello') {
-    console.log('Translation service unavailable, keeping original descriptions');
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.log('GEMINI_API_KEY not set, keeping original descriptions');
     return skills;
   }
-  console.log('Translation service available, translating...');
-  for (const s of skills) {
-    const original = s.summary || '';
-    if (original) {
-      s._descZh = await translateToChinese(original);
-    } else {
-      s._descZh = '暂无描述';
+
+  console.log('Translating descriptions to Chinese via Gemini...');
+
+  // 构建批量翻译 prompt
+  const descriptions = skills.map((s, i) => `[${i + 1}] ${(s.summary || '').substring(0, 300)}`).join('\n');
+  const prompt = `你是一位专业的 AI 产品翻译。请将以下 AI Agent Skill 的英文描述翻译为简洁、专业的中文。
+
+要求：
+- 保留专有名词（如 CLI、API、GitHub、PDF、Agent 等）不翻译
+- 每条翻译控制在 80 字以内，简明扼要
+- 严格按编号逐条输出，格式为 [编号] 翻译内容
+- 不要添加额外解释
+
+${descriptions}`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const raw = await httpsPost(url, {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.3 },
+    });
+
+    const result = JSON.parse(raw);
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // 解析 [编号] 翻译内容 格式
+    const lines = text.split('\n').filter(l => l.trim());
+    for (const line of lines) {
+      const match = line.match(/^\[(\d+)\]\s*(.+)/);
+      if (match) {
+        const idx = parseInt(match[1]) - 1;
+        if (idx >= 0 && idx < skills.length) {
+          skills[idx]._descZh = match[2].trim();
+        }
+      }
     }
+
+    const translated = skills.filter(s => s._descZh).length;
+    console.log(`Successfully translated ${translated}/${skills.length} descriptions`);
+  } catch (err) {
+    console.log(`Gemini translation failed: ${err.message}, keeping original descriptions`);
   }
+
   return skills;
 }
 
