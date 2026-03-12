@@ -90,7 +90,7 @@ async function translateSkillDescriptions(skills) {
 ${descriptions}`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`;
     const raw = await httpsPost(url, {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: { temperature: 0.3 },
