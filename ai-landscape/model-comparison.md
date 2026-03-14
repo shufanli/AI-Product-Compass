@@ -86,6 +86,11 @@
 **产品集成优势**：Claude Code（CLI 编程工具）、MCP 协议生态完善；支持 AWS Bedrock、Google Vertex AI、Azure Foundry
 **注意事项**：1M 上下文仅对 usage tier 4 及以上开放；快速模式（fast mode）价格 6x
 
+**实践笔记 · Claude Code + Codex 协作工作流**（2026-03-14）：
+- **Claude Code（Opus）负责规划层**：做任务拆解、编排终端操作、管理 Git 工作流。Opus 在跨上下文窗口的工作中效率更高，适合同时启动多个子代理并行探索代码库。
+- **Codex 负责执行层**：承接具体编码任务。在长时间自主编码任务上更稳定，适合持续运行的代码生成与修改。
+- **分工原则**：Claude Code = 大脑（规划 + 调度），Codex = 手（执行 + 编码）。
+
 ---
 
 ### GPT（OpenAI）
@@ -278,5 +283,6 @@
 
 | 日期 | 变更摘要 |
 |------|---------|
+| 2026-03-14 | 新增 Claude Code + Codex 协作工作流实践笔记（Claude Code/Opus 负责规划编排，Codex 负责长时间自主编码）。 |
 | 2026-03-10 | **重大更新**：DeepSeek V4 正式发布（万亿参数、原生多模态、1M 上下文、定价 ~$0.14/$0.28）；GPT-5.4 新增 Thinking 模式和 Pro 版（$30/$180），旧模型大批退休；Gemini 3 Pro Preview 已于 3/9 关停，3.1 Flash-Lite 正式发布；Qwen3.5-Plus 升级为阿里旗舰（397B-A17B MoE，超越 Qwen3-Max）；MiniMax 发布 M2.1 中间版；Claude 新增 Cowork 桌面预览和企业自助购买。更新选型指南和性价比矩阵。 |
 | 2026-03-07 | 初版创建。覆盖 8 家模型截至 2026 年 3 月的最新信息，包括 Claude Opus/Sonnet 4.6、GPT-5.4/5.3 Codex、Gemini 3.1 Pro、MiniMax M2.5、Kimi K2.5、Qwen3-Max/3.5、Doubao-Seed-2.0-Pro、DeepSeek-V3.2。 |
