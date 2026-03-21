@@ -8,6 +8,7 @@
 - **AI 产品方法论** — Prompt 工程、模型评测（Eval）、人机交互设计、幻觉治理、冷启动策略
   - [AI Native 产品工作流：拥抱不确定性](ai-native-product-workflow.md)
   - [Agent-Native 时代：软件生态的范式转移](agent-native-era.md)
+  - [Agent 时代的产品设计：当用户变成 Agent](design-for-agent-era.md)
 - **思维模型** — 第一性原理、反转思维、决策矩阵等
   - [如何想一个产品 Feature：从真问题出发](how-to-think-of-a-feature.md)
 - **用户心理** — 认知偏差、决策机制、行为影响
