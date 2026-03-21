@@ -12,6 +12,7 @@
   - [如何想一个产品 Feature：从真问题出发](how-to-think-of-a-feature.md)
 - **用户心理** — 认知偏差、决策机制、行为影响
   - [启动效应与产品设计：管理用户的联想状态](priming-and-product-design.md)
+  - [情绪设计：产品经理就是用户旅程的导演](emotional-design-user-journey.md)
 - **数据驱动** — 埋点体系、数据漏斗、增长指标
   - [产品发布数据漏斗：发布前准备 & 发布后对齐](launch-data-funnel.md)
 - **用户研究** — 访谈方法、问卷设计、用户画像
