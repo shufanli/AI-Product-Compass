@@ -97,26 +97,52 @@ tccli tat DescribeInvocationTasks --region ap-hongkong \
 - "10/10 API 测试通过"但核心用户流程没跑通
 - 详细复盘见 `clawschool-gstack/POSTMORTEM.md`
 
-### 第二次实验（待执行，三 Agent）
+### 第二次实验（2026-03-26，三 Agent）
 
-**启动命令：**
-```bash
-cd /path/to/clawschool-gstack
-/Users/shufanli/Evan/teamo-runner-agency-test/scripts/run-forever.sh .
-```
+**仓库：** `teamo-lab/clawschool-three-agents-test`
 
-**监控：**
-```bash
-tail -f agent-run.log        # 实时日志
-cat NEXT_STEP.md              # 当前进度
-cat EVAL_FEEDBACK.md          # 最新评估报告
-cat SPRINT_PLAN.md            # Sprint 计划
-```
+**结果：功能开发成功，部署未完成**
 
-**停止：**
-```bash
-touch STOP
-```
+#### 时间线
+- 第 1 轮：Planner 拆出 7 个 Sprint（只有功能，没有部署和埋点）
+- 第 1-7 轮：Generator 完成 7 个 Sprint，Evaluator 逐轮打回修复
+- 第 8 轮：连续达标，但进入空转——**Planner 没规划部署 Sprint**
+- 人工介入：手动追加 Sprint 8（部署）+ Sprint 9（埋点）
+- 第 11 轮：Generator 完成 Sprint 8/9（写了 Dockerfile + docker-compose.yml + 埋点系统）
+- 第 12-14 轮：继续空转——**Generator 写了部署文件但从未执行 TAT 部署命令**
+
+#### 发现的问题
+
+| # | 问题 | 根因 | 影响 |
+|---|------|------|------|
+| 1 | **Planner 没规划部署 Sprint** | Planner prompt 只说"拆成 Sprint"，没强调必须包含部署和埋点 | 功能全做完但产品没上线，空转 3 轮浪费 token |
+| 2 | **Generator 写了 Dockerfile 但不执行部署** | Generator 把"写 docker-compose.yml"当成"部署完成"，没有用 TAT 在服务器上执行 | Sprint 8 验收标准写了"docker-compose up 成功"但 Evaluator 没验证远程服务器 |
+| 3 | **Evaluator 没验证远程部署** | Evaluator 只测了 localhost，没检查服务器 43.159.0.211 上是否真的跑起来了 | "部署 Sprint 达标"是虚假达标 |
+| 4 | **连续达标后空转不结束** | run-forever.sh 的结束条件是 NEXT_STEP.md 包含"全部完成"，但 NEXT_STEP.md 写的是"下一步：部署到服务器" | 不触发结束也不触发新动作，持续烧 token |
+| 5 | **Generator 不主动读技能仓库** | 和第一次实验一样的问题——急于写代码，不先读 skills/05-deployment.md 里的 TAT 命令 | 有现成方案但不用 |
+
+#### 做到了什么（对比第一次）
+
+| 维度 | 第一次（单 Agent） | 第二次（三 Agent） |
+|------|-------------------|----------------------|
+| Sprint 规划 | ❌ 没有 | ✅ 7 个 Sprint + 验收标准 |
+| 功能完成度 | 前端 6 页 + 后端 11 API | ✅ 9 Sprint 全部完成，全部验收通过 |
+| 自评偏高 | "10/10 通过"但核心闭环没跑 | ✅ Evaluator 7 轮打回逐轮修复 |
+| XSS 发现 | ❌ | ✅ 3 处 XSS 被发现并修复 |
+| 视觉质量 | 未验证 | ✅ 9/10 逐项对照 DESIGN.md |
+| OG 图片中文 | ❌ | ✅ 发现→bundled Noto Sans CJK 修复 |
+| 埋点 | 自建基础版 | ✅ 完整漏斗埋点 + 看板 API |
+| Docker 化 | 有但没跑 | 有但没跑（同样的问题） |
+| **真实部署** | ❌ cloudflared 临时方案 | ❌ 没执行 TAT |
+| **核心闭环** | ❌ 从没测过 | ⚠️ API 模拟通过，OpenClaw 未实测 |
+
+#### 需要改进的
+
+1. **Planner prompt 必须强制包含部署和埋点 Sprint** — 不能只规划功能
+2. **部署 Sprint 的验收标准必须是"远程服务器可访问"** — 不是"Dockerfile 存在"
+3. **Evaluator 对部署类 Sprint 必须验证远程** — 用 TAT 执行 curl 确认，或 /browse 打开服务器 IP
+4. **连续达标 3 轮后如果还有未完成的下一步，应该强制 Generator 执行** — 不是继续空转
+5. **Generator prompt 要强制先读技能文档再动手** — "做部署前必须先读 skills/05-deployment.md"
 
 ---
 
