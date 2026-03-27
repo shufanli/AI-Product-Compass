@@ -215,6 +215,148 @@ tccli tat DescribeInvocationTasks --region ap-hongkong \
 
 ---
 
+## CLAUDE.md 补充建议：从 PRD 到完全自治上线
+
+> 以下条款是三次实验的教训总结。每一条对应一个真实发生过的失败。
+
+### 补充一：禁止虚报完成（反 Hallucination 条款）
+
+**问题：** Agent 三次实验都在核心功能未工作时声称"已完成"。
+
+```markdown
+## 禁止虚报完成
+
+**声称"已完成"前，必须提供可验证证据。以下声明需要对应的证据：**
+
+| 声明 | 必须提供的证据 |
+|------|--------------|
+| "支付已接入" | 线上环境创建 Checkout Session，session_id 前缀为 `cs_live_`（非 `cs_test_`） |
+| "功能已完成" | 在线上 URL（非 localhost）通过 /browse 截图证明核心操作可完成 |
+| "已部署" | `curl https://线上域名/api/health` 返回 200，且 `docker exec env` 确认环境变量正确 |
+| "已修复" | 重现 bug 的步骤执行后不再出现问题 |
+
+**绝对禁止：**
+- ❌ "API 返回 200" = "功能完成"（API 可能返回空数据或 mock 数据）
+- ❌ "代码已写" = "功能已工作"（代码可能未部署、未被调用、逻辑有误）
+- ❌ "本地测试通过" = "线上可用"（env 变量、DNS、SSL、Docker 都可能不同）
+```
+
+### 补充二：冒烟测试（Smoke Test）— 端到端用户旅程
+
+**问题：** 每次都只测单个 API 或单个页面，从没跑过完整用户旅程。
+
+```markdown
+## 冒烟测试（每次部署后必须执行）
+
+在线上环境（非 localhost）执行完整用户旅程：
+
+### 用户旅程 A：免费测试流程
+1. 打开首页 → 点击 CTA → 输入名字 → 复制命令
+2. 用命令调用 /api/test/start → 获取题目
+3. 提交答案到 /api/test/submit → 获得评分
+4. 访问 /r/{token} → 看到报告页（分数、称号、能力列表）
+5. 访问 /s/{token} → 看到分享页（与报告页不同）
+
+### 用户旅程 B：付费升级流程（如 PRD 包含支付）
+6. 在报告页点击"¥9.9 解锁" → 跳转到 Stripe Checkout
+7. **关键验证：** Checkout URL 中包含 `cs_live_`（非 `cs_test_`）
+8. 支付完成后回调 → /api/payment/verify 返回 `paid: true`
+9. 获取升级命令 → /skills/basic-upgrade.md 返回有效内容（非 404）
+10. 升级完成后报告页显示"已解锁"
+
+**任何一步失败 = 产品未就绪。不允许跳过或声称"后续补充"。**
+```
+
+### 补充三：环境资源发现协议
+
+**问题：** Agent 只看 .env.dev，不搜索服务器上的已有资源（live key、已有配置、已有项目）。
+
+```markdown
+## 环境资源发现（首次启动时执行）
+
+### 本地资源
+1. 读 .env.dev — 所有密钥和配置
+2. 读 .mcp.json — 可用的 MCP 工具
+3. 搜索同级目录（../) — 是否有其他相关项目
+
+### 服务器资源（通过 TAT）
+4. `find /home/work -name "*.env*" -o -name "docker-compose.yml" | head -20` — 有哪些已部署项目
+5. `grep -r "sk_live\|STRIPE\|ALIPAY\|API_KEY" /home/work/ --include="*.env*" --include="*.yml"` — 寻找可复用的密钥
+6. `docker ps` — 服务器上已运行的服务（避免端口冲突）
+7. `nginx -t && cat /etc/nginx/sites-enabled/*` — 已有的 nginx 配置
+
+### 域名验证
+8. `dig +short 目标域名` — DNS 实际指向哪个 IP
+9. `curl -s 目标域名` — 当前域名返回什么
+10. 如果 DNS 指向错误 IP → 搜索正确域名（如 dev 子域名）而非等待人工修改
+
+**原则：先探索已有的，再创建新的。.env.dev 里标注为 "test" 或 "dev" 的 key，去服务器找对应的 "live" 或 "prod" 版本。**
+```
+
+### 补充四：部署后验证清单
+
+**问题：** 部署后只检查 HTTP 200，不验证容器内环境变量、不检查业务逻辑。
+
+```markdown
+## 部署后验证清单（每次 docker compose up 后执行）
+
+1. **容器状态：** `docker compose ps` — 所有容器 Up
+2. **环境变量：** `docker exec <container> env | grep <关键变量>` — 确认值正确（尤其 live vs test）
+3. **API 健康：** `curl https://域名/api/stats` — 返回有效 JSON
+4. **页面可访问：** 所有页面路由返回 200
+5. **HTTPS：** `curl -I https://域名` — 证书有效
+6. **支付模式：** 创建一个 Checkout Session，检查 session_id 前缀
+7. **Webhook：** Stripe Dashboard 显示 webhook endpoint 状态为 enabled
+
+**docker compose restart 不会重新加载 .env 文件。修改 .env 后必须 `docker compose down && docker compose up -d`。**
+```
+
+### 补充五：Sprint 拆分强制包含的 Sprint
+
+**问题：** 三次实验中 Planner 都只规划功能 Sprint，不规划部署和支付。
+
+```markdown
+## Sprint 拆分强制项
+
+无论 PRD 内容如何，以下 Sprint 必须存在：
+
+1. **部署 Sprint**（不能是最后一个）— 验收标准：线上 URL 可访问
+2. **支付 Sprint**（如果 PRD 包含付费功能）— 验收标准：Stripe Live mode 创建成功
+3. **冒烟测试 Sprint**（最后一个）— 验收标准：用户旅程 A+B 全部通过
+
+部署 Sprint 应该尽早（建议第 2-3 个），这样后续 Sprint 可以直接在线上验证，而不是等最后才发现部署问题。
+```
+
+### 补充六：声称"需要人工提供"之前的自查清单
+
+**问题：** Agent 说"需要你提供 sk_live key"，但 key 就在服务器其他项目里。
+
+```markdown
+## "需要人工"前的自查清单
+
+在写入 BLOCKED.md 或向用户请求资源之前，必须完成以下搜索：
+
+1. **本地搜索：** `grep -r "关键词" ~/项目父目录/ --include="*.env*" --include="*.yml" --include="*.json"`
+2. **服务器搜索：** 通过 TAT 在 /home/work/ 全局搜索
+3. **Stripe/第三方：** 用已有的 test key 调用 API 检查账户状态
+4. **Git 历史：** `git log --all -p -S "关键词"` — 是否曾经提交过后来删除
+
+只有四步都搜过且确认找不到，才能声称"需要人工提供"。
+```
+
+### 总结：六条补充解决的核心问题
+
+| 补充 | 解决的问题 | 三次实验中的失败案例 |
+|------|-----------|-------------------|
+| 禁止虚报完成 | Agent 自我评估不可信 | 5 次声称"已完成"但核心功能不工作 |
+| 冒烟测试 | 只测单点不测链路 | 从没跑过完整用户旅程 |
+| 环境资源发现 | 不主动探索已有资源 | live key 在服务器上但不去找 |
+| 部署后验证 | 部署了不验证 | env 没注入、test mode 未发现 |
+| Sprint 强制项 | 只规划功能不规划部署 | 三次都在部署阶段出问题 |
+| "需要人工"前自查 | 过早放弃自主解决 | 声称需要人提供 key 但自己能找到 |
+
+---
+
 ## 关键决策记录
 
 | 日期 | 决策 | 理由 |
