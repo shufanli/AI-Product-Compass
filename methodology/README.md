@@ -11,6 +11,7 @@
   - [Agent 时代的产品设计：当用户变成 Agent](design-for-agent-era.md)
 - **思维模型** — 第一性原理、反转思维、决策矩阵等
   - [如何想一个产品 Feature：从真问题出发](how-to-think-of-a-feature.md)
+  - [产品定义的钻探术：从模糊愿景到精准切片](product-definition-drilling-down.md)
 - **用户心理** — 认知偏差、决策机制、行为影响
   - [启动效应与产品设计：管理用户的联想状态](priming-and-product-design.md)
   - [情绪设计：产品经理就是用户旅程的导演](emotional-design-user-journey.md)
