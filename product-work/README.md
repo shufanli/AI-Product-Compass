@@ -10,3 +10,4 @@
 - **设计协作** — 交互规范、原型评审记录
 - **项目推进** — 排期、站会纪要、上线复盘
   - [GitHub Push 飞书自动通知](github-feishu-push-notify.md)
+  - [两个 AI 项目复盘：Timoronda + 龙虾学校](two-ai-projects-retro-2026q1.md) — 2026 Q1 连续两个项目的立项、犯错、教训与结果
