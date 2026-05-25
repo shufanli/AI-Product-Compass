@@ -2,7 +2,7 @@
 
 每周自动收集 ClawHub（clawhub.ai）上最火爆的 10 个 OpenClaw Skills，帮助 AI 产品经理了解 AI Agent 生态动态。
 
-> 最后更新：2026-05-18
+> 最后更新：2026-05-25
 
 ---
 
@@ -10,16 +10,16 @@
 
 | 排名 | Skill 名称 | 下载量 | 描述 |
 |:----:|-----------|------:|------|
-| 1 | **Self-Improving Agent** | 439,732 | Captures learnings, errors, and corrections to enable continuous improvement. Use when: (1) A command or operation fails unexpectedly, (2) User corrects Clau... |
-| 2 | **Skill Vetter** | 242,213 | Security-first skill vetting for AI agents. Use before installing any skill from ClawdHub, GitHub, or other sources. Checks for red flags, permission scope, and suspicious patterns. |
-| 3 | **Self-Improving + Proactive Agent** | 188,235 | Self-reflection + Self-criticism + Self-learning + Self-organizing memory. Agent evaluates its own work, catches mistakes, and improves permanently. Use when... |
-| 4 | **Gog** | 175,578 | Google Workspace CLI for Gmail, Calendar, Drive, Contacts, Sheets, and Docs. |
-| 5 | **ontology** | 181,740 | Typed knowledge graph for structured agent memory and composable skills. Use when creating/querying entities (Person, Project, Task, Event, Document), linkin... |
-| 6 | **Github** | 179,282 | Interact with GitHub using the `gh` CLI. Use `gh issue`, `gh pr`, `gh run`, and `gh api` for issues, PRs, CI runs, and advanced queries. |
-| 7 | **Proactive Agent** | 159,732 | Transform AI agents from task-followers into proactive partners that anticipate needs and continuously improve. Now with WAL Protocol, Working Buffer, Autonomous Crons, and battle-tested patterns. Part of the Hal Stack 🦞 |
-| 8 | **Polymarket** | 190,672 | Query Polymarket prediction markets. Check odds, find trending markets, search events, track price movements. |
-| 9 | **Multi Search Engine** | 142,689 | Multi search engine integration with 16 engines (7 CN + 9 Global). Supports advanced search operators, time filters, site search, privacy engines, and Wolfra... |
-| 10 | **Weather** | 152,103 | Get current weather and forecasts (no API key required). |
+| 1 | **Self-Improving Agent** | 447,436 | 捕获学习、错误和修正，实现持续改进。用于命令操作意外失败或用户纠正Agent时。 |
+| 2 | **Skill Vetter** | 247,710 | 为AI Agent提供安全优先的技能审查。在从ClawdHub、GitHub或其他来源安装技能前使用，检查风险、权限范围和可疑模式。 |
+| 3 | **Self-Improving + Proactive Agent** | 192,006 | 结合自反思、自批评、自学习和自组织记忆。Agent评估自身工作，发现错误并永久改进。 |
+| 4 | **Gog** | 179,348 | Google Workspace CLI，支持Gmail、Calendar、Drive、Contacts、Sheets和Docs。 |
+| 5 | **ontology** | 184,504 | 类型化知识图谱，用于Agent结构化记忆和可组合技能。创建/查询实体（如Person、Project、Task、Event、Document）时使用。 |
+| 6 | **Github** | 183,214 | 使用`gh` CLI与GitHub交互。通过`gh issue`、`gh pr`、`gh run`和`gh api`处理问题、PR、CI运行和高级查询。 |
+| 7 | **Polymarket** | 207,105 | 查询Polymarket预测市场。查看���率、发现热门市场、搜索事件并追踪价格变动。 |
+| 8 | **Proactive Agent** | 162,893 | 将AI Agent从任务执行者转变为主动伙伴，预判需求并持续改进。支持WAL Protocol、Working Buffer、Autonomous Crons和成熟模式。Hal Stack组件。 |
+| 9 | **Multi Search Engine** | 146,074 | 多搜索引擎集成，支持16个引擎（7个CN + 9个Global）。支持高级搜索操作符、时间筛选、站内搜索、隐私引擎和Wolfra... |
+| 10 | **Weather** | 155,040 | 获取当前天气和预报（无需API key）。 |
 
 ---
 
@@ -36,4 +36,4 @@
 
 | 日期 | 变更摘要 |
 |------|---------|
-| 2026-05-18 | 本周 Top 10 热门 Skills 更新 |
+| 2026-05-25 | 本周 Top 10 热门 Skills 更新 |
