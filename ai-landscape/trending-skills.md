@@ -2,7 +2,7 @@
 
 每周自动收集 ClawHub（clawhub.ai）上最火爆的 10 个 OpenClaw Skills，帮助 AI 产品经理了解 AI Agent 生态动态。
 
-> 最后更新：2026-08-03
+> 最后更新：2026-08-10
 
 ---
 
@@ -10,16 +10,16 @@
 
 | 排名 | Skill 名称 | 下载量 | 描述 |
 |:----:|-----------|------:|------|
-| 1 | **self-improving agent** | 472,054 | 记录Agent的学习、错误和修正，实现持续改进。 |
-| 2 | **Skill Vetter** | 267,848 | 为AI Agent提供安全优先的技能审查。安装来自ClawdHub、GitHub等来源的技能前使用，检查风险、权限范围和可疑模式。 |
-| 3 | **Self-Improving + Proactive Agent** | 206,165 | 结合自我反思、自我批评、自学习和自组织记忆。Agent评估自身工作，发现并纠正错误，实现永久性改进。 |
-| 4 | **Gog** | 190,197 | 适用于Gmail、Calendar、Drive、Contacts、Sheets和Docs的Google Workspace CLI。 |
-| 5 | **ontology** | 195,327 | 为Agent提供结构化记忆和可组合技能的类型化知识图谱。用于创建/查询实体（Person, Project, Task, Event, Document）及关联。 |
-| 6 | **Github** | 194,639 | 通过`gh` CLI与GitHub交互。使用`gh issue`、`gh pr`、`gh run`和`gh api`处理issue、PRs、CI运行和高级查询。 |
-| 7 | **Proactive Agent** | 173,194 | 将AI Agent从任务执行者转变为主动型伙伴，预���需求并持续改进。支持WAL Protocol、Working Buffer、Autonomous Crons等，是Hal Stack的一部分。 |
-| 8 | **Multi Search Engine** | 158,468 | 集成16个搜索引擎（7个中文+9个全球）。支持高级搜索操作符、时间筛选、站内搜索、隐私引擎和Wolfra。 |
-| 9 | **Weather** | 165,858 | 获取当前天气和天气预报（无需API key）。 |
-| 10 | **SkillScan** | 180,359 | 技能安全门。所有新技能使用前必须通过SkillScan。在安装、加载、添加、评估或对技能有安全疑问时激活。 |
+| 1 | **self-improving agent** | 473,246 | 捕获学习、错误和修正，实现持续改进。用于命令失败、用户纠正、能力缺失或外部API/工具故障时。 |
+| 2 | **Skill Vetter** | 268,706 | AI Agent技能安全优先审查。在从ClawdHub、GitHub或其他来源安装技能前使用，检查危险信号、权限范围和可疑模式。 |
+| 3 | **Self-Improving + Proactive Agent** | 206,678 | 自我反思+自我批评+自学习+自组织记忆。Agent评估自身工作，发现并永久改进错误。 |
+| 4 | **Gog** | 190,646 | 适用于Gmail、Calendar、Drive、Contacts、Sheets和Docs的Google Workspace CLI。 |
+| 5 | **ontology** | 195,789 | 类型化知识图谱，用于结构化Agent记忆和可组合技能。创建/查询实体（如Person、Project、Task、Event、Document）时使用。 |
+| 6 | **Github** | 195,133 | 使用`gh` CLI与GitHub交互。通过`gh issue`、`gh pr`、`gh run`和`gh api`处理issue、PR、CI运行和高级查询。 |
+| 7 | **Proactive Agent** | 173,586 | 将AI Agent从任务执��者转变为主动伙伴，预判需求并持续改进。集成WAL Protocol、Working Buffer、Autonomous Crons和成熟模式。Hal Stack组件。 |
+| 8 | **Multi Search Engine** | 158,901 | 多搜索引擎集成，支持16个引擎（7个中文+9个全球）。支持高级搜索操作符、时间过滤、站点搜索、隐私引擎和Wolfra。 |
+| 9 | **Weather** | 166,369 | 获取当前天气和预报（无需API key）。 |
+| 10 | **SkillScan** | 180,639 | 技能安全门。所有新技能使用前必须通过SkillScan。在安装、加载、添加、评估或有安全疑问时激活。 |
 
 ---
 
@@ -36,4 +36,4 @@
 
 | 日期 | 变更摘要 |
 |------|---------|
-| 2026-08-03 | 本周 Top 10 热门 Skills 更新 |
+| 2026-08-10 | 本周 Top 10 热门 Skills 更新 |
